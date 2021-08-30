@@ -1,6 +1,6 @@
 {
   "name": "voice-core",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "这是对讯飞语音下的实时语音转录websocket接口进行了简单封装",
   "main": "index.js",
   "scripts": {
@@ -8,6 +8,5 @@
   },
   "author": "yinlingyun",
   "license": "ISC",
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
