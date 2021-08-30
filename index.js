@@ -47,7 +47,7 @@ export class voiceCore {
             if (this.config.onError && typeof this.config.onError == 'function') {
               this.config.onError('数据格式错误，请检查格式');
             }
-            return null
+            throw '传入数据格式错误，请检查格式'
           }
           if (pure !== '') {
             let strResult = checkStrResult(textData, pure);
@@ -65,26 +65,35 @@ export class voiceCore {
           if (this.config.onError && typeof this.config.onError == 'function') {
             this.config.onError(err);
           }
+          throw err
         })
     };
-    this.state = 'ing';
+    this.state = 'end';
     //以下信息在控制台-我的应用-实时语音转写 页面获取
     if (!appId || appId === '' || typeof appId !== 'string') {
       if (this.config.onError && typeof this.config.onError == 'function') {
         this.config.onError('appId为空或格式错误');
       }
+      throw 'appId为空或格式错误'
     }
     if (!apiKey || apiKey === '' || typeof apiKey !== 'string') {
       if (this.config.onError && typeof this.config.onError == 'function') {
         this.config.onError('apiKey为空或格式错误');
       }
+      throw 'apiKey为空或格式错误'
     }
     this.appId = appId;
     this.apiKey = apiKey;
   }
 
   start() {
-    this.stop();
+    // this.stop();
+    if(this.state === 'ing'){
+      if (this.config.onError && typeof this.config.onError == 'function') {
+        this.config.onError('已经开启无须重复开启');
+      }
+      return false
+    }
     if (navigator.getUserMedia && AudioContext) {
       this.state = 'ing';
       if (!this.recorder) {
@@ -105,6 +114,7 @@ export class voiceCore {
           if (this.config.onError && typeof this.config.onError == 'function') {
             this.config.onError('请求麦克风失败');
           }
+          throw '请求麦克风失败'
         };
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           navigator.mediaDevices
@@ -137,7 +147,10 @@ export class voiceCore {
       }
     } else {
       const isChrome = navigator.userAgent.toLowerCase().match(/chrome/);
-      alert(notSupportTip);
+      if (this.config.onError && typeof this.config.onError == 'function') {
+        this.config.onError(notSupportTip);
+      }
+      throw notSupportTip
     }
   }
 
@@ -147,6 +160,9 @@ export class voiceCore {
       this.mediaStream.disconnect(this.recorder);
       this.recorder.disconnect();
     } catch (e) {
+      // if (this.config.onError && typeof this.config.onError == 'function') {
+      //   this.config.onError(e);
+      // }
     }
   }
 
@@ -235,7 +251,6 @@ export class voiceCore {
     var jsonData = JSON.parse(e.data);
     if (jsonData.action == 'started') {
       // 握手成功
-      console.log('握手成功');
     } else if (jsonData.action == 'result') {
       // 转写结果
       if (this.config.onMessage && typeof this.config.onMessage == 'function') {
@@ -243,10 +258,10 @@ export class voiceCore {
       }
     } else if (jsonData.action == 'error') {
       // 连接发生错误
-      console.log('出错了:', jsonData);
       if (this.config.onError && typeof this.config.onError == 'function') {
         this.config.onError(jsonData);
       }
+      throw jsonData
     }
   }
 
@@ -273,10 +288,10 @@ function checkStrResult(textData, pureStr) {
   return new Promise((resolve, reject) => {
       textData.forEach((item, index) => {
         var textArray = item.text.split("|");
-        for(let i=0;i++,i<textArray.length-1;){
+        for(let i=0;i<=textArray.length-1;i++){
           if (pureStr.indexOf(textArray[i]) > -1 && item.success && typeof item.success == 'function') {
-            resolve(false);
             item.success(item, index);
+            resolve(false);
             break
           }
         }
