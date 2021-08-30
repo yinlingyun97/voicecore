@@ -42,20 +42,24 @@ export class voiceCore {
       var text = setResult(JSON.parse(message));
       text.then((res) => {
           var pure = pureString(res);
-          if(!textData || !Array.isArray(textData)){
+          if (!textData || !Array.isArray(textData)) {
             console.info('数据格式错误，请检查格式');
             if (this.config.onError && typeof this.config.onError == 'function') {
               this.config.onError('数据格式错误，请检查格式');
             }
             return null
           }
-          if (pure !== '' ) {
-            if(!checkStrResult(config,textData,pure) && this.config.matchFailed && typeof this.config.matchFailed == 'function') {
-              this.config.matchFailed({
-                result:pure,
-                dsc:'无匹配数据'
-              })
-            }
+
+          if (pure !== '') {
+            let strResult = checkStrResult(textData, pure);
+            strResult.then((res) => {
+              if (res && this.config.matchFailed && typeof this.config.matchFailed == 'function') {
+                this.config.matchFailed({
+                  result: res,
+                  dsc: '无匹配数据'
+                })
+              }
+            })
           }
         },
         (err) => {
@@ -66,6 +70,16 @@ export class voiceCore {
     };
     this.state = 'ing';
     //以下信息在控制台-我的应用-实时语音转写 页面获取
+    if (!appId || appId === '' || typeof appId !== 'string') {
+      if (this.config.onError && typeof this.config.onError == 'function') {
+        this.config.onError('appId为空或格式错误');
+      }
+    }
+    if (!apiKey || apiKey === '' || typeof apiKey !== 'string') {
+      if (this.config.onError && typeof this.config.onError == 'function') {
+        this.config.onError('apiKey为空或格式错误');
+      }
+    }
     this.appId = appId;
     this.apiKey = apiKey;
   }
@@ -252,23 +266,24 @@ export class voiceCore {
  *
  * @Description: 方法说明 从之前设置的数据进行语句匹配，如果匹配成功则运行对应的成功方法
  * @method 方法名 checkStrResult
- * @return { Boolean } 返回值说明 匹配成功与否
- * @param config 语音助手各项回调函数的配置
+ * @return {Promise<>} 返回值说明 匹配成功与否
  * @param textData 预先设置的语句数据
  * @param pureStr 接口返回的净化后的字符串
  */
-async function checkStrResult(config,textData,pureStr) {
-  let str = false;
-  await textData.forEach((item, index) => {
-    var textArray = item.text.split("|");
-    textArray.forEach((textItem) => {
-      if (pureStr.indexOf(textItem) > -1 && item.success && typeof item.success == 'function') {
-        str = true;
-        item.success(item, index);
-      }
-    })
-  });
-  return str
+function checkStrResult(textData, pureStr) {
+  return new Promise((resolve, reject) => {
+      textData.forEach((item, index) => {
+        var textArray = item.text.split("|");
+        textArray.forEach((textItem) => {
+          if (pureStr.indexOf(textItem) > -1 && item.success && typeof item.success == 'function') {
+            resolve(false);
+            item.success(item, index);
+          }
+        })
+      });
+      resolve(pureStr)
+    }
+  );
 }
 
 /**

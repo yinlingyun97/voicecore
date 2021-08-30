@@ -29,9 +29,8 @@
     };
 
 2.textData
-  示例：
-  ![Image text](https://bj.bcebos.com/shitu-query-bj/2021-08-27/15/d79afd806a7651d1?authorization=bce-auth-v1%2F7e22d8caf5af46cc9310f1e3021709f3%2F2021-08-27T07%3A57%3A12Z%2F300%2F%2F352044e343edab14a7e806f5f01b5625f897646c0dc4d3bcb4140bbd982ed72b)
-
+  传入的语音数据
+  
 3.appId
   讯飞语音实时转写接口的服务接口认证信息，详情看链接：
   https://www.xfyun.cn/doc/asr/rtasr/API.html#%E6%8E%A5%E5%8F%A3%E8%AF%B4%E6%98%8E
@@ -45,3 +44,5 @@
 2.如程序报错5位错误码，请到文档或错误码链接查询
   https://www.xfyun.cn/doc/asr/rtasr/API.html
   https://www.xfyun.cn/document/error-code
+3.更详细的调用说明请参考我的CSDN文章
+  https://blog.csdn.net/qq_39958056/article/details/119956288
