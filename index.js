@@ -49,7 +49,6 @@ export class voiceCore {
             }
             return null
           }
-
           if (pure !== '') {
             let strResult = checkStrResult(textData, pure);
             strResult.then((res) => {
@@ -274,12 +273,13 @@ function checkStrResult(textData, pureStr) {
   return new Promise((resolve, reject) => {
       textData.forEach((item, index) => {
         var textArray = item.text.split("|");
-        textArray.forEach((textItem) => {
-          if (pureStr.indexOf(textItem) > -1 && item.success && typeof item.success == 'function') {
+        for(let i=0;i++,i<textArray.length-1;){
+          if (pureStr.indexOf(textArray[i]) > -1 && item.success && typeof item.success == 'function') {
             resolve(false);
             item.success(item, index);
+            break
           }
-        })
+        }
       });
       resolve(pureStr)
     }
