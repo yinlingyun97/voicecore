@@ -35,7 +35,7 @@ navigator.getUserMedia =
  * @param {string} 参数名 appId  参数说明 讯飞实时语音转写接口appId
  * @param {string} 参数名 apiKey  参数说明 讯飞实时语音转写接口apiKey
  */
-export class voiceCore {
+export class VoiceCore {
   constructor(config, textData, appId, apiKey) {
     this.config = config;
     this.config.onMessage = (message) => {
