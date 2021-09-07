@@ -103,7 +103,13 @@ export class VoiceCore {
         const getMediaSuccess = (stream) => {
           this.mediaStream = this.context.createMediaStreamSource(stream);
           this.recorder.onaudioprocess = (e) => {
-            this.sendData(e.inputBuffer.getChannelData(0));
+            const voiceData = e.inputBuffer.getChannelData(0);
+            this.sendData(voiceData);
+            const maxVal = Math.max.apply(Math, voiceData);
+            // 显示音量值
+            if (this.config.voiceValue && typeof this.config.voiceValue == 'function') {
+              this.config.voiceValue(Math.round(maxVal * 100));
+            }
           };
           this.connectWebsocket();
         };
