@@ -166,7 +166,7 @@ export class VoiceCore {
     }
   }
 
-  sendData = (buffer) => {
+  sendData (buffer) {
     var data = {
       command: 'transform',
       buffer: buffer,
@@ -265,7 +265,7 @@ export class VoiceCore {
     }
   }
 
-  ArrayBufferToBase64 = (buffer) => {
+  ArrayBufferToBase64(buffer){
     var binary = '';
     const bytes = new Uint8Array(buffer);
     const len = bytes.byteLength;
