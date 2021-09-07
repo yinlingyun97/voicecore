@@ -165,6 +165,9 @@ export class VoiceCore {
     try {
       this.mediaStream.disconnect(this.recorder);
       this.recorder.disconnect();
+      if (this.config.voiceValue && typeof this.config.voiceValue == 'function') {
+        this.config.voiceValue(0);
+      }
     } catch (e) {
       // if (this.config.onError && typeof this.config.onError == 'function') {
       //   this.config.onError(e);
