@@ -19,6 +19,10 @@
 	  // 语音助手错误时输出错误方法
       onError: (err) => {
       },
+      // 说话时的实时分贝值
+      voiceValue:(e)=>{
+        console.info(e)
+      },
 	  // 语音助手未找到匹配结果时调用方法
       matchFailed: (e) => {
 		console.info(e) // { 'result':'识别结果','dsc':'无匹配数据'}
