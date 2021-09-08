@@ -1,7 +1,7 @@
 /**
  * Created by lycheng on 2019/8/9.
  */
-export class recorderWorker {
+module.exports  = class recorderWorker {
   constructor(config, appId, apiKey) {}
 
   static onmessage(e) {

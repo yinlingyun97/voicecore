@@ -1,4 +1,4 @@
-export var CryptoJSNew =
+var CryptoJSNew =
   CryptoJSNew ||
   (function (g, l) {
     var e = {},
@@ -285,3 +285,4 @@ export var CryptoJSNew =
     },
   });
 })();
+module.exports = CryptoJSNew

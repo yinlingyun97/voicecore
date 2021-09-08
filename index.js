@@ -1,30 +1,81 @@
-/**
- * Created by iflytek on 2019/11/12.
- *
- * 实时转写调用demo
- * 此demo只是一个简单的调用示例，不适合用到实际生产环境中
- *
- * 实时语音转写 WebAPI 接口调用示例 接口文档（必看）：https://www.xfyun.cn/doc/asr/rtasr/API.html
- * 错误码链接：
- * https://www.xfyun.cn/doc/asr/rtasr/API.html
- * https://www.xfyun.cn/document/error-code （code返回错误码时必看）
- *
- */
+'use strict'
+
 require('./dependencies/enc-base64-min');
 // 音频转码worker
-var recorderWorker = require('./dependencies/transformpcm.worker').recorderWorker;
+var recorderWorker = require('./dependencies/transformpcm.worker');
 // 记录处理的缓存音频
 var buffers = [];
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 var notSupportTip = '请试用chrome浏览器且域名为localhost或127.0.0.1测试';
 var md5 = require('./dependencies/md5');
-var CryptoJSNew = require('./dependencies/HmacSHA1').CryptoJSNew;
-var CryptoJS = require('./dependencies/hmac-sha256').CryptoJS;
+var CryptoJSNew = require('./dependencies/HmacSHA1');
+var CryptoJS = require('./dependencies/hmac-sha256');
 navigator.getUserMedia =
   navigator.getUserMedia ||
   navigator.webkitGetUserMedia ||
   navigator.mozGetUserMedia ||
   navigator.msGetUserMedia;
+
+/**
+ *
+ * @Description: 方法说明 从讯飞语音识别引擎返回参数筛选出识别结果
+ * @method 方法名 setResult
+ * @return {number | string } 返回值说明 语音识别结果
+ * @param data 讯飞语音识别引擎返回结果
+ */
+async function setResult(data) {
+  var rtasrResult = [];
+  rtasrResult[data.seg_id] = data;
+  let str = '';
+  await rtasrResult.forEach(i => {
+    if (i.cn.st.type == 0) {
+      i.cn.st.rt.forEach(j => {
+        j.ws.forEach(k => {
+          k.cw.forEach(l => {
+            str += l.w
+          })
+        })
+      });
+    }
+  });
+  return str
+}
+
+/**
+ *
+ * @Description: 方法说明 处理数据格式 去中英文标点符号
+ * @method 方法名 pureString
+ * @return {number | string } 返回值说明 去逗号之后的数据
+ * @param str 需要净化的字符串
+ */
+function pureString(str) {
+  return str.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\，|\、|\。|\？|\<|\.|\>|\/|\?]/g, "");
+}
+
+/**
+ *
+ * @Description: 方法说明 从之前设置的数据进行语句匹配，如果匹配成功则运行对应的成功方法
+ * @method 方法名 checkStrResult
+ * @return {Promise<>} 返回值说明 匹配成功与否
+ * @param textData 预先设置的语句数据
+ * @param pureStr 接口返回的净化后的字符串
+ */
+function checkStrResult(textData, pureStr) {
+  return new Promise((resolve, reject) => {
+      textData.forEach((item, index) => {
+        var textArray = item.text.split("|");
+        for(let i=0;i<=textArray.length-1;i++){
+          if (pureStr.indexOf(textArray[i]) > -1 && item.success && typeof item.success == 'function') {
+            item.success(item, index);
+            resolve(false);
+            break
+          }
+        }
+      });
+      resolve(pureStr)
+    }
+  );
+}
 
 /**
  *
@@ -35,7 +86,7 @@ navigator.getUserMedia =
  * @param {string} 参数名 appId  参数说明 讯飞实时语音转写接口appId
  * @param {string} 参数名 apiKey  参数说明 讯飞实时语音转写接口apiKey
  */
-export class VoiceCore {
+module.exports = class VoiceCore {
   constructor(config, textData, appId, apiKey) {
     this.config = config;
     this.config.onMessage = (message) => {
@@ -51,10 +102,10 @@ export class VoiceCore {
           }
           if (pure !== '') {
             let strResult = checkStrResult(textData, pure);
-            strResult.then((res) => {
-              if (res && this.config.matchFailed && typeof this.config.matchFailed == 'function') {
+            strResult.then((val) => {
+              if (val && this.config.matchFailed && typeof this.config.matchFailed == 'function') {
                 this.config.matchFailed({
-                  result: res,
+                  result: val,
                   dsc: '无匹配数据'
                 })
               }
@@ -69,7 +120,7 @@ export class VoiceCore {
         })
     };
     this.state = 'end';
-    //以下信息在控制台-我的应用-实时语音转写 页面获取
+    // 以下信息在控制台-我的应用-实时语音转写 页面获取
     if (!appId || appId === '' || typeof appId !== 'string') {
       if (this.config.onError && typeof this.config.onError == 'function') {
         this.config.onError('appId为空或格式错误');
@@ -120,7 +171,7 @@ export class VoiceCore {
           if (this.config.onError && typeof this.config.onError == 'function') {
             this.config.onError('请求麦克风失败');
           }
-          throw '请求麦克风失败'
+          throw e
         };
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           navigator.mediaDevices
@@ -187,12 +238,12 @@ export class VoiceCore {
   getHandShakeParams() {
     const appId = this.appId;
     const secretKey = this.apiKey;
-    const ts = Math.floor(new Date().getTime() / 1000); /*new Date().getTime()/1000+'';*/
-    const signa = md5.hex_md5(appId + ts); //hex_md5(encodeURIComponent(appId + ts));//EncryptUtil.HmacSHA1Encrypt(EncryptUtil.MD5(appId + ts), secretKey);
+    const ts = Math.floor(new Date().getTime() / 1000); /* new Date().getTime()/1000+''; */
+    const signa = md5.hex_md5(appId + ts); // hex_md5(encodeURIComponent(appId + ts));//EncryptUtil.HmacSHA1Encrypt(EncryptUtil.MD5(appId + ts), secretKey);
     const signatureSha = CryptoJSNew.HmacSHA1(signa, secretKey);
     var signature = CryptoJS.enc.Base64.stringify(signatureSha);
     signature = encodeURIComponent(signature);
-    return '?appid=' + appId + '&ts=' + ts + '&signa=' + signature;
+    return `?appid=${  appId  }&ts=${  ts  }&signa=${  signature}`;
   }
 
   connectWebsocket() {
@@ -247,11 +298,11 @@ export class VoiceCore {
           this.ws.send('{"end": true}');
           clearInterval(this.handlerInterval);
         }
-        return false;
+        return;
       }
-      const audioData = buffers.splice(0, 1280);
-      if (audioData.length > 0) {
-        this.ws.send(new Int8Array(audioData));
+      const voiceData = buffers.splice(0, 1280);
+      if (voiceData.length > 0) {
+        this.ws.send(new Int8Array(voiceData));
       }
     }, 40);
   }
@@ -283,65 +334,4 @@ export class VoiceCore {
     }
     return window.btoa(binary);
   };
-}
-
-/**
- *
- * @Description: 方法说明 从之前设置的数据进行语句匹配，如果匹配成功则运行对应的成功方法
- * @method 方法名 checkStrResult
- * @return {Promise<>} 返回值说明 匹配成功与否
- * @param textData 预先设置的语句数据
- * @param pureStr 接口返回的净化后的字符串
- */
-function checkStrResult(textData, pureStr) {
-  return new Promise((resolve, reject) => {
-      textData.forEach((item, index) => {
-        var textArray = item.text.split("|");
-        for(let i=0;i<=textArray.length-1;i++){
-          if (pureStr.indexOf(textArray[i]) > -1 && item.success && typeof item.success == 'function') {
-            item.success(item, index);
-            resolve(false);
-            break
-          }
-        }
-      });
-      resolve(pureStr)
-    }
-  );
-}
-
-/**
- *
- * @Description: 方法说明 从讯飞语音识别引擎返回参数筛选出识别结果
- * @method 方法名 setResult
- * @return {number | string } 返回值说明 语音识别结果
- * @param data 讯飞语音识别引擎返回结果
- */
-async function setResult(data) {
-  let rtasrResult = [];
-  rtasrResult[data.seg_id] = data;
-  let str = '';
-  await rtasrResult.forEach(i => {
-    if (i.cn.st.type == 0) {
-      i.cn.st.rt.forEach(j => {
-        j.ws.forEach(k => {
-          k.cw.forEach(l => {
-            str += l.w
-          })
-        })
-      });
-    }
-  });
-  return str
-}
-
-/**
- *
- * @Description: 方法说明 处理数据格式 去中英文标点符号
- * @method 方法名 pureString
- * @return {number | string } 返回值说明 去逗号之后的数据
- * @param str 需要净化的字符串
- */
-function pureString(str) {
-  return str.replace(/[\ |\~|\`|\!|\@|\#|\$|\%|\^|\&|\*|\(|\)|\-|\_|\+|\=|\||\\|\[|\]|\{|\}|\;|\:|\"|\'|\,|\，|\、|\。|\？|\<|\.|\>|\/|\?]/g, "");
-}
+};

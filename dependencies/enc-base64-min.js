@@ -5,7 +5,7 @@
  code.google.com/p/crypto-js/wiki/License
  */
 (function () {
-  var h = require('./hmac-sha256').CryptoJS,
+  var h = require('./hmac-sha256'),
     j = h.lib.WordArray;
   h.enc.Base64 = {
     stringify: function (b) {
