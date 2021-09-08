@@ -1,6 +1,6 @@
 ## 引入
 1.可以通过import方式进行引入：
-  import {voiceCore} from 'voice-core';
+  import VoiceCore from 'voice-core';
 2.可以通过require方式进行引入：
   const voiceCore = require('voice-core').voiceCore;
   
