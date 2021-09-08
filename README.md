@@ -2,10 +2,10 @@
 1.可以通过import方式进行引入：
   import VoiceCore from 'voice-core';
 2.可以通过require方式进行引入：
-  const voiceCore = require('voice-core').voiceCore;
+  const VoiceCore = require('voice-core');
   
 ## 使用
-  let voice = new voiceCore(config,textData, appId, apiKey);
+  let voice = new VoiceCore(config,textData, appId, apiKey);
   开启语音识别：voice.start() 
   关闭语音识别：voice.stop()
   
