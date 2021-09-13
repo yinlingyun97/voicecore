@@ -1,12 +1,19 @@
 {
   "name": "voice-core",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "这是对讯飞语音下的实时语音转录websocket接口进行了简单封装",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "yinlingyun",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yinlingyun97/voicecore.git"
+  },
+  "author": "yinlingyun97",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/youthcity/ts-hi/issues"
+  },
   "devDependencies": {}
 }
