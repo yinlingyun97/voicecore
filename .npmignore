@@ -1,2 +1,6 @@
 **/.idea/
-gitignore/
+.gitignore
+**/node_modules
+**/.vscode
+yarn.lock
+package-lock.json
