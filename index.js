@@ -66,7 +66,7 @@ function checkStrResult(textData, pureStr) {
         var textArray = item.text.split("|");
         for(let i=0;i<=textArray.length-1;i++){
           if (pureStr.indexOf(textArray[i]) > -1 && item.success && typeof item.success == 'function') {
-            item.success(item, index);
+            item.success(item, pureStr);
             resolve(false);
             break
           }
@@ -226,9 +226,11 @@ module.exports = class VoiceCore {
       if (this.config.voiceValue && typeof this.config.voiceValue == 'function') {
         this.config.voiceValue(0);
       }
-      if (this.config.onClose && typeof this.config.onClose == 'function') {
-        this.config.onClose();
-      }
+      setTimeout(()=>{
+        if (this.config.onClose && typeof this.config.onClose == 'function') {
+          this.config.onClose();
+        }
+      },500);
     } catch (e) {
       // if (this.config.onError && typeof this.config.onError == 'function') {
       //   this.config.onError(e);
