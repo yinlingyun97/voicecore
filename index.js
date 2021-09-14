@@ -230,9 +230,9 @@ module.exports = class VoiceCore {
         this.config.onClose();
       }
     } catch (e) {
-      if (this.config.onError && typeof this.config.onError == 'function') {
-        this.config.onError(e);
-      }
+      // if (this.config.onError && typeof this.config.onError == 'function') {
+      //   this.config.onError(e);
+      // }
     }
   }
 
