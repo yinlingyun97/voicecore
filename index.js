@@ -226,9 +226,12 @@ module.exports = class VoiceCore {
       if (this.config.voiceValue && typeof this.config.voiceValue == 'function') {
         this.config.voiceValue(0);
       }
-    } catch (e) {
       if (this.config.onClose && typeof this.config.onClose == 'function') {
         this.config.onClose();
+      }
+    } catch (e) {
+      if (this.config.onError && typeof this.config.onError == 'function') {
+        this.config.onError(e);
       }
     }
   }
@@ -284,7 +287,6 @@ module.exports = class VoiceCore {
     };
     this.ws.onclose = (e) => {
       this.stop();
-      this.config.onClose && this.config.onClose(e);
     };
   }
 
