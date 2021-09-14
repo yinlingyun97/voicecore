@@ -6,7 +6,7 @@ var recorderWorker = require('./dependencies/transformpcm.worker');
 // 记录处理的缓存音频
 var buffers = [];
 var AudioContext = window.AudioContext || window.webkitAudioContext;
-var notSupportTip = '请试用chrome浏览器且域名为localhost或127.0.0.1测试';
+var notSupportTip = '请使用chrome浏览器';
 var md5 = require('./dependencies/md5');
 var CryptoJSNew = require('./dependencies/HmacSHA1');
 var CryptoJS = require('./dependencies/hmac-sha256');
@@ -96,6 +96,7 @@ module.exports = class VoiceCore {
           if (!textData || !Array.isArray(textData)) {
             console.info('数据格式错误，请检查格式');
             if (this.config.onError && typeof this.config.onError == 'function') {
+              this.stop();
               this.config.onError('数据格式错误，请检查格式');
             }
             throw '传入数据格式错误，请检查格式'
@@ -114,6 +115,7 @@ module.exports = class VoiceCore {
         },
         (err) => {
           if (this.config.onError && typeof this.config.onError == 'function') {
+            this.stop();
             this.config.onError(err);
           }
           throw err
@@ -123,12 +125,14 @@ module.exports = class VoiceCore {
     // 以下信息在控制台-我的应用-实时语音转写 页面获取
     if (!appId || appId === '' || typeof appId !== 'string') {
       if (this.config.onError && typeof this.config.onError == 'function') {
+        this.stop();
         this.config.onError('appId为空或格式错误');
       }
       throw 'appId为空或格式错误'
     }
     if (!apiKey || apiKey === '' || typeof apiKey !== 'string') {
       if (this.config.onError && typeof this.config.onError == 'function') {
+        this.stop();
         this.config.onError('apiKey为空或格式错误');
       }
       throw 'apiKey为空或格式错误'
@@ -141,6 +145,7 @@ module.exports = class VoiceCore {
     // this.stop();
     if(this.state === 'ing'){
       if (this.config.onError && typeof this.config.onError == 'function') {
+        this.stop();
         this.config.onError('已经开启无须重复开启');
       }
       return false
@@ -169,6 +174,7 @@ module.exports = class VoiceCore {
           this.mediaStream = null;
           this.context = null;
           if (this.config.onError && typeof this.config.onError == 'function') {
+            this.stop();
             this.config.onError('请求麦克风失败');
           }
           throw e
@@ -205,6 +211,7 @@ module.exports = class VoiceCore {
     } else {
       const isChrome = navigator.userAgent.toLowerCase().match(/chrome/);
       if (this.config.onError && typeof this.config.onError == 'function') {
+        this.stop();
         this.config.onError(notSupportTip);
       }
       throw notSupportTip
@@ -220,9 +227,9 @@ module.exports = class VoiceCore {
         this.config.voiceValue(0);
       }
     } catch (e) {
-      // if (this.config.onError && typeof this.config.onError == 'function') {
-      //   this.config.onError(e);
-      // }
+      if (this.config.onClose && typeof this.config.onClose == 'function') {
+        this.config.onClose();
+      }
     }
   }
 
@@ -319,6 +326,7 @@ module.exports = class VoiceCore {
     } else if (jsonData.action == 'error') {
       // 连接发生错误
       if (this.config.onError && typeof this.config.onError == 'function') {
+        this.stop();
         this.config.onError(jsonData);
       }
       throw jsonData
