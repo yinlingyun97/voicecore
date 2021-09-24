@@ -66,8 +66,15 @@ function checkStrResult(textData, pureStr) {
         var textArray = item.text.split("|");
         for(let i=0;i<=textArray.length-1;i++){
           if (pureStr.indexOf(textArray[i]) > -1 && item.success && typeof item.success == 'function') {
-            item.success(item, pureStr);
+            item.success(item);
             resolve(false);
+            break
+          }
+          if (this.config.textResponse && typeof this.config.textResponse == 'function') {
+            this.config.textResponse({
+              result: pureStr,
+              dsc: '匹配成功'
+            });
             break
           }
         }
@@ -104,8 +111,8 @@ module.exports = class VoiceCore {
           if (pure !== '') {
             let strResult = checkStrResult(textData, pure);
             strResult.then((val) => {
-              if (val && this.config.matchFailed && typeof this.config.matchFailed == 'function') {
-                this.config.matchFailed({
+              if (val && this.config.textResponse && typeof this.config.textResponse == 'function') {
+                this.config.textResponse({
                   result: val,
                   dsc: '无匹配数据'
                 })

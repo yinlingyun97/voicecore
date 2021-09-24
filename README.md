@@ -23,9 +23,11 @@
       voiceValue:(e)=>{
         console.info(e)
       },
-	  // 语音助手未找到匹配结果时调用方法
-      matchFailed: (e) => {
-		console.info(e) // { 'result':'识别结果','dsc':'无匹配数据'}
+	  // 语音助手匹配结果
+      textResponse: (e) => {
+        // 匹配成功时返回 { 'result':'识别结果','dsc':'匹配成功'}
+        // 匹配失败时返回 { 'result':'识别结果','dsc':'无匹配数据'}
+		console.info(e)
       },
 	  // 语音助手启动时调用方法
       onStart: () => {
