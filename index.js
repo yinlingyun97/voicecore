@@ -68,13 +68,13 @@ function checkStrResult(textData, pureStr) {
           if (pureStr.indexOf(textArray[i]) > -1 && item.success && typeof item.success == 'function') {
             item.success(item);
             resolve(false);
-            break
-          }
-          if (this.config.textResponse && typeof this.config.textResponse == 'function') {
-            this.config.textResponse({
-              result: pureStr,
-              dsc: '匹配成功'
-            });
+            if (this.config.textResponse && typeof this.config.textResponse == 'function') {
+              this.config.textResponse({
+                result: pureStr,
+                dsc: '匹配成功'
+              });
+              break
+            }
             break
           }
         }
