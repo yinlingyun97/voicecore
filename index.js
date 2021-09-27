@@ -60,21 +60,22 @@ function pureString(str) {
  * @param textData 预先设置的语句数据
  * @param pureStr 接口返回的净化后的字符串
  */
-function checkStrResult(textData, pureStr) {
+function checkStrResult(textData, pureStr,that) {
   return new Promise((resolve, reject) => {
       textData.forEach((item, index) => {
         var textArray = item.text.split("|");
         for(let i=0;i<=textArray.length-1;i++){
           if (pureStr.indexOf(textArray[i]) > -1 && item.success && typeof item.success == 'function') {
             item.success(item);
-            resolve(false);
-            if (this.config.textResponse && typeof this.config.textResponse == 'function') {
-              this.config.textResponse({
+            if (that.config.textResponse && typeof that.config.textResponse == 'function') {
+              that.config.textResponse({
                 result: pureStr,
                 dsc: '匹配成功'
               });
+              resolve(false);
               break
             }
+            resolve(false);
             break
           }
         }
@@ -109,7 +110,7 @@ module.exports = class VoiceCore {
             throw '传入数据格式错误，请检查格式'
           }
           if (pure !== '') {
-            let strResult = checkStrResult(textData, pure);
+            const strResult = checkStrResult(textData, pure,this);
             strResult.then((val) => {
               if (val && this.config.textResponse && typeof this.config.textResponse == 'function') {
                 this.config.textResponse({
