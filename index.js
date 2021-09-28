@@ -288,8 +288,12 @@ module.exports = class VoiceCore {
       this.config.onStart && this.config.onStart(e);
     };
     this.ws.onmessage = (e) => {
-      // this.config.onMessage && this.config.onMessage(e);
-      this.wsOnMessage(e);
+      if (this.config.startMatching && typeof this.config.startMatching == 'function') {
+        this.config.startMatching();
+      }
+      setTimeout(()=>{
+        this.wsOnMessage(e);
+      },1000)
     };
     this.ws.onerror = (e) => {
       this.stop();
